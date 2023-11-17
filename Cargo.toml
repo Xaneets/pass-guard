@@ -1,0 +1,13 @@
+[package]
+name = "pass-guard"
+version = "0.1.0"
+edition = "2021"
+
+
+license = "MIT"
+authors = ["Dmitriy Sergeev <xaneets@gmail.com>"]
+
+[dependencies]
+eframe = {version = "0.23.0", features = ["persistence"]}
+env_logger = "0.10"
+rfd = "0.11"
