@@ -1,6 +1,7 @@
 use eframe::egui;
 use eframe::egui::{InnerResponse, Ui};
 use egui::{FontFamily, FontId, TextStyle};
+use std::fmt::Write;
 use std::path::Path;
 
 mod utils;
@@ -80,6 +81,7 @@ impl PassGuardApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             self.render_main_form(ui);
+            self.dd_preview(ctx);
         });
     }
 
@@ -93,7 +95,15 @@ impl PassGuardApp {
                 ui.end_row();
                 ui.add_space(200.0);
                 ui.label("Vault");
-                ui.add_sized([240.0, 20.0], egui::Button::new("Choose Vault"));
+                let file_button = ui.add_sized([240.0, 20.0], egui::Button::new("Choose Vault"));
+                if file_button.clicked() {
+                    if let Some(path) = rfd::FileDialog::new()
+                        .add_filter("vault", &["vault"])
+                        .pick_file()
+                    {
+                        self._path_to_vault = Some(path.into_boxed_path())
+                    }
+                }
             })
         });
     }
@@ -118,6 +128,38 @@ impl PassGuardApp {
                     });
                 })
         })
+    }
+
+    fn dd_preview(&mut self, ctx: &egui::Context) {
+        if !ctx.input(|i| i.raw.hovered_files.is_empty()) {
+            let text = ctx.input(|i| {
+                let mut text = "Dropping files:\n".to_owned();
+                for file in &i.raw.hovered_files {
+                    if let Some(path) = &file.path {
+                        self._path_to_vault = Some(path.clone().into_boxed_path());
+                        write!(text, "\n{}", path.display()).ok();
+                    } else {
+                        break;
+                    }
+                }
+                text
+            });
+
+            let painter = ctx.layer_painter(egui::LayerId::new(
+                egui::Order::Foreground,
+                egui::Id::new("dd_file"),
+            ));
+
+            let screen_rect = ctx.screen_rect();
+            painter.rect_filled(screen_rect, 0.0, egui::Color32::from_black_alpha(192));
+            painter.text(
+                screen_rect.center(),
+                egui::Align2::CENTER_CENTER,
+                text,
+                TextStyle::Monospace.resolve(&ctx.style()),
+                egui::Color32::WHITE,
+            );
+        }
     }
 }
 
