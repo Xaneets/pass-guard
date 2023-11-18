@@ -4,6 +4,7 @@ use egui::{FontFamily, FontId, TextStyle};
 use std::fmt::Write;
 use std::path::Path;
 
+mod crypto;
 mod utils;
 
 fn main() {
