@@ -5,8 +5,17 @@ use ring::aead::{
 use ring::error::Unspecified;
 
 #[derive(Clone, Copy)]
-pub struct NonceSeq(u64);
+pub struct NonceSeq(pub u64);
 
+impl NonceSeq {
+    pub fn as_bytes(&self) -> [u8; NONCE_LEN] {
+        let mut nonce_bytes = [0; NONCE_LEN];
+
+        let bytes: [u8; 8] = self.0.to_be_bytes();
+        nonce_bytes[4..].copy_from_slice(&bytes);
+        nonce_bytes
+    }
+}
 impl NonceSequence for NonceSeq {
     fn advance(&mut self) -> Result<Nonce, Unspecified> {
         let mut nonce_bytes = vec![0; NONCE_LEN];

@@ -1,4 +1,4 @@
-use eframe::{egui, CreationContext};
+use eframe::egui;
 use gui::pass_guard_app::PassGuardApp;
 
 mod crypto;
