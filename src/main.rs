@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate serde;
+
 use eframe::egui;
 use gui::pass_guard_app::PassGuardApp;
 
@@ -13,10 +16,5 @@ fn main() {
         resizable: false,
         ..Default::default()
     };
-    eframe::run_native(
-        "Password Guard",
-        options,
-        Box::new(|cc| PassGuardApp::new(cc)),
-    )
-    .expect("Fatal error!");
+    eframe::run_native("Password Guard", options, Box::new(|cc| PassGuardApp::new(cc))).expect("Fatal error!");
 }

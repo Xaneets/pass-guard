@@ -1,16 +1,16 @@
 use crate::crypto::aes_256_gcm::NonceSeq;
 use crate::gui::pass_guard_app::PassGuardApp;
 use crate::{crypto, utils};
+
 use eframe::egui;
 use eframe::egui::Context;
 use rand::Rng;
-use ring::aead::chacha20_poly1305_openssh::TAG_LEN;
-use ring::aead::Tag;
+use serde::Serialize;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct CreateVaultModal {
     pub modal: bool,
     pub modal_tabs: CreateVaultTabs,
@@ -19,7 +19,7 @@ pub struct CreateVaultModal {
     pub path_to_new_vault: Option<Box<Path>>,
 }
 
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, Serialize, Deserialize)]
 pub enum CreateVaultTabs {
     General,
     Test,
@@ -78,23 +78,14 @@ impl CreateVaultModal {
                                             let mut f = File::create(app.create_vault_modal.path_to_new_vault.clone().unwrap())
                                                 .expect("Create File Error!");
                                             let hash = crypto::hash::sha256(app.create_vault_modal.master_key_1.as_bytes());
-                                            let hash: [u8; 32] = hex::decode(format!("{:?}", hash).replace("SHA256:", ""))
-                                                .expect("Failed to gen shapass")
-                                                .as_slice()
-                                                .try_into()
-                                                .expect("Failed cast Vec<u8> to [u8; 32]");
-
                                             let mut rng = rand::thread_rng();
                                             let random_u64: u64 = rng.gen();
 
-                                            let (data, tag, seq) = crypto::aes_256_gcm::Aes256Gcm::encrypt(
-                                                Vec::from("Hello".as_bytes()),
-                                                hash,
-                                                NonceSeq(random_u64),
-                                            )
-                                            .expect("Encrypt error!");
+                                            let (_, tag, seq) = crypto::aes_256_gcm::Aes256Gcm::encrypt(vec![], hash, NonceSeq(random_u64))
+                                                .expect("Encrypt error!");
+
                                             // write metadata ( `Tag` + `NonceSequence` )
-                                            let tag = unsafe { std::mem::transmute::<&Tag, &[u8; TAG_LEN]>(&tag) };
+                                            let tag = utils::unsafe_cast::tag_as_bytes(&tag);
                                             let mut metadata: [u8; 16 + 12] = [0; 16 + 12];
                                             metadata[..16].copy_from_slice(tag);
                                             metadata[16..].copy_from_slice(&seq.as_bytes());

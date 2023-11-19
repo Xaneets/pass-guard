@@ -1,13 +1,16 @@
 use crate::gui::create_vault_modal::CreateVaultModal;
-use crate::utils;
+use crate::{crypto, utils};
 
 use eframe::egui;
 use eframe::egui::{InnerResponse, Ui};
 use egui::{FontFamily, FontId, TextStyle};
 use std::fmt::Write;
+use std::fs::File;
+use std::io;
+use std::io::Read;
 use std::path::Path;
 
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct PassGuardApp {
     master_key: String,
     path_to_vault: Option<Box<Path>>,
@@ -60,7 +63,10 @@ impl PassGuardApp {
                 let name_label = ui.label("Master Key");
                 ui.add(egui::TextEdit::singleline(&mut self.master_key).password(true))
                     .labelled_by(name_label.id);
-                ui.add_sized([90.0, 20.0], egui::Button::new("Into vault"));
+                let into_bnt = ui.add_sized([90.0, 20.0], egui::Button::new("Into vault"));
+                if into_bnt.clicked() {
+                    self.check_vault_access();
+                }
                 ui.end_row();
                 ui.add_space(200.0);
                 ui.label("Vault");
@@ -78,6 +84,52 @@ impl PassGuardApp {
                 CreateVaultModal::create_vault_modal(self, ctx);
             })
         });
+    }
+
+    fn check_vault_access(&mut self) {
+        if self.master_key.is_empty() {
+            return;
+        }
+        let path;
+        match self.path_to_vault.clone() {
+            None => {
+                return;
+            }
+            Some(p) => {
+                path = p;
+            }
+        }
+        let file = File::open(path).expect("eee");
+        let mut buffer = Vec::new();
+
+        let mut reader = io::BufReader::new(file);
+
+        reader.read_to_end(&mut buffer).expect("err");
+        let mut meta: [u8; 16 + 12] = [0; 16 + 12];
+        meta.copy_from_slice(&buffer[..16 + 12]);
+        let mut content = vec![];
+        content.extend_from_slice(&buffer[16 + 12..]);
+        let hash = crypto::hash::sha256(self.master_key.as_bytes());
+        let mut tag: [u8; 16] = [0; 16];
+        tag.copy_from_slice(&meta[..16]);
+        let mut nonce: [u8; 12] = [0; 12];
+        nonce.copy_from_slice(&meta[16..]);
+
+        let res = crypto::aes_256_gcm::Aes256Gcm::decrypt(
+            content.clone(),
+            hash,
+            utils::unsafe_cast::bytes_as_nonce(nonce),
+            *utils::unsafe_cast::bytes_as_tag(tag),
+        );
+        match res {
+            Ok((_, _, _)) => {
+                println!("Todo!")
+            }
+            Err(e) => {
+                println!("Pass Error! {e}")
+            }
+        }
+        ()
     }
 
     fn render_header(ui: &mut Ui) -> InnerResponse<()> {
