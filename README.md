@@ -1,5 +1,7 @@
 # Pass-Guard
 
+![Build](https://github.com/xaneets/pass-guard/actions/workflows/build.yml/badge.svg)
+
 **Pass-Guard** is an application for securely storing passwords using the AES-256-GCM encryption algorithm. The project is developed in the Rust programming language and utilizes the eframe framework to create a graphical interface.
 
 ## Description
