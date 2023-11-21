@@ -6,6 +6,7 @@ use gui::pass_guard_app::PassGuardApp;
 
 mod crypto;
 mod gui;
+mod models;
 mod utils;
 
 fn main() {
