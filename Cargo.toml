@@ -8,7 +8,7 @@ license = "MIT"
 authors = ["Dmitriy Sergeev <xaneets@gmail.com>"]
 
 [dependencies]
-eframe = {version = "0.23.0", features = ["persistence"]}
+eframe = {version = "0.24.0", features = ["persistence"]}
 env_logger = "0.10"
 rfd = "0.12.0"
 ring = "0.17.5"

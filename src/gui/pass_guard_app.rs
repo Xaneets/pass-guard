@@ -2,7 +2,7 @@ use crate::gui::create_vault_modal::CreateVaultModal;
 use crate::{crypto, utils};
 
 use eframe::egui;
-use eframe::egui::{InnerResponse, PointerButton, Ui};
+use eframe::egui::{InnerResponse, Ui};
 use egui::{FontFamily, FontId, TextStyle};
 use std::fmt::Write;
 use std::fs::File;
@@ -87,27 +87,12 @@ impl PassGuardApp {
                         ui.label("URL");
                         ui.label("Description");
                         ui.end_row();
-                        ui.label("1");
-                        ui.label("2");
-                        ui.label("3");
-                        ui.label("4");
-                        ui.label("5");
-                        ui.end_row();
-                        ui.label("1");
-                        ui.label("2");
-                        ui.label("3");
-                        ui.label("4");
-                        ui.label("5");
                     })
                     .response;
-
                 if grid.clicked() {
-                    println!("click!")
+                    println!("Click")
                 }
-                if grid.clicked_by(PointerButton::Secondary) {
-                    println!("right click!")
-                }
-            })
+            });
         });
     }
 
