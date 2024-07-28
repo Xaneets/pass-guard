@@ -65,40 +65,40 @@ impl PassGuardApp {
         }
     }
 
-    fn render_vault(&mut self, ctx: &egui::Context) {
-        egui::SidePanel::left("sub-vault").show(ctx, |ui| {
-            ui.label("placeholder");
-            ui.label("placeholder");
-            ui.label("placeholder");
-            ui.label("placeholder");
-            ui.label("placeholder");
-            ui.label("placeholder");
-            ui.label("placeholder");
-        });
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.horizontal_top(|ui| {
-                let grid = egui::Grid::new("records")
-                    .num_columns(5)
-                    .striped(true)
-                    .show(ui, |ui| {
-                        //header
-                        ui.label("Title");
-                        ui.label("User name");
-                        ui.label("Password");
-                        ui.label("URL");
-                        ui.label("Description");
-                        ui.end_row();
-                    })
-                    .response;
-                if grid.clicked() {
-                    println!("Click")
-                }
-            });
-            // self.render_vault(ctx);
-            self.render_main_form(ui, ctx);
-            self.dd_preview(ctx);
-        });
-    }
+    // fn render_vault(&mut self, ctx: &egui::Context) {
+    //     egui::SidePanel::left("sub-vault").show(ctx, |ui| {
+    //         ui.label("placeholder");
+    //         ui.label("placeholder");
+    //         ui.label("placeholder");
+    //         ui.label("placeholder");
+    //         ui.label("placeholder");
+    //         ui.label("placeholder");
+    //         ui.label("placeholder");
+    //     });
+    //     egui::CentralPanel::default().show(ctx, |ui| {
+    //         ui.horizontal_top(|ui| {
+    //             let grid = egui::Grid::new("records")
+    //                 .num_columns(5)
+    //                 .striped(true)
+    //                 .show(ui, |ui| {
+    //                     //header
+    //                     ui.label("Title");
+    //                     ui.label("User name");
+    //                     ui.label("Password");
+    //                     ui.label("URL");
+    //                     ui.label("Description");
+    //                     ui.end_row();
+    //                 })
+    //                 .response;
+    //             if grid.clicked() {
+    //                 println!("Click")
+    //             }
+    //         });
+    //         // self.render_vault(ctx);
+    //         self.render_main_form(ui, ctx);
+    //         self.dd_preview(ctx);
+    //     });
+    // }
 
     fn render_main_form(&mut self, ui: &mut Ui, ctx: &egui::Context) {
         ui.horizontal_centered(|ui| {
@@ -211,8 +211,8 @@ impl PassGuardApp {
         let res = crypto::aes_256_gcm::Aes256Gcm::decrypt(
             content.clone(),
             self.sha_pass,
-            utils::unsafe_cast::bytes_as_nonce(nonce),
-            *utils::unsafe_cast::bytes_as_tag(tag),
+            utils::unsafe_cast::bytes_as_nonce(&nonce),
+            *utils::unsafe_cast::bytes_as_tag(&tag),
         );
         match res {
             Ok((_, _, _)) => {
