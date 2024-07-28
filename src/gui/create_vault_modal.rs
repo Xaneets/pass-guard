@@ -41,10 +41,12 @@ impl CreateVaultModal {
             .open(&mut app.create_vault_modal.modal)
             .show(ctx, |ui| {
                 ui.horizontal_top(|ui| {
+                    // ui.group(|ui| {
                     ui.selectable_value(&mut app.create_vault_modal.modal_tabs, CreateVaultTabs::General, "General");
                     ui.selectable_value(&mut app.create_vault_modal.modal_tabs, CreateVaultTabs::Test, "Test");
+                    // })
                 });
-                ui.separator();
+                ui.separator(); // todo replace space
                 match app.create_vault_modal.modal_tabs {
                     CreateVaultTabs::General => {
                         egui::Grid::new("create-vault-grid")

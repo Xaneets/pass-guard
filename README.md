@@ -16,6 +16,9 @@
 ## Requirements
 
 - Rust: Install according to the [official instructions](https://www.rust-lang.org/tools/install).
+- `apt install -y libgtk-3-dev`
+- `apt install -y pkg-config`
+
 
 ## Installation and Running
 

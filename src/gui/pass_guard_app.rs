@@ -2,7 +2,7 @@ use crate::gui::create_vault_modal::CreateVaultModal;
 use crate::{crypto, utils};
 
 use eframe::egui;
-use eframe::egui::{InnerResponse, PointerButton, Ui};
+use eframe::egui::{Align, Align2, CentralPanel, Context, InnerResponse, Layout, PointerButton, Rect, Ui};
 use egui::{FontFamily, FontId, TextStyle};
 use egui_extras::{Column, TableBuilder};
 use std::fmt::Write;
@@ -55,7 +55,13 @@ impl PassGuardApp {
         match self.is_in_vault {
             false => {
                 egui::CentralPanel::default().show(ctx, |ui| {
-                    self.render_main_form(ui, ctx);
+                    let size = egui::vec2(500.0, 100.0); // Размеры сетки
+                    let rect = ui.available_rect_before_wrap();
+                    let pos = Align2::CENTER_CENTER.align_size_within_rect(size, rect).min;
+
+                    let mut child_ui = ui.child_ui(Rect::from_min_size(pos, size), *ui.layout(), None);
+
+                    self.render_main_form(&mut child_ui, ctx);
                     self.dd_preview(ctx);
                 });
             }
@@ -65,71 +71,31 @@ impl PassGuardApp {
         }
     }
 
-    // fn render_vault(&mut self, ctx: &egui::Context) {
-    //     egui::SidePanel::left("sub-vault").show(ctx, |ui| {
-    //         ui.label("placeholder");
-    //         ui.label("placeholder");
-    //         ui.label("placeholder");
-    //         ui.label("placeholder");
-    //         ui.label("placeholder");
-    //         ui.label("placeholder");
-    //         ui.label("placeholder");
-    //     });
-    //     egui::CentralPanel::default().show(ctx, |ui| {
-    //         ui.horizontal_top(|ui| {
-    //             let grid = egui::Grid::new("records")
-    //                 .num_columns(5)
-    //                 .striped(true)
-    //                 .show(ui, |ui| {
-    //                     //header
-    //                     ui.label("Title");
-    //                     ui.label("User name");
-    //                     ui.label("Password");
-    //                     ui.label("URL");
-    //                     ui.label("Description");
-    //                     ui.end_row();
-    //                 })
-    //                 .response;
-    //             if grid.clicked() {
-    //                 println!("Click")
-    //             }
-    //         });
-    //         // self.render_vault(ctx);
-    //         self.render_main_form(ui, ctx);
-    //         self.dd_preview(ctx);
-    //     });
-    // }
-
     fn render_main_form(&mut self, ui: &mut Ui, ctx: &egui::Context) {
-        ui.horizontal_centered(|ui| {
-            egui::Grid::new("form").max_col_width(250.0).show(ui, |ui| {
-                // ui.add_space(200.0);
-                let name_label = ui.label("Master Key");
-                ui.add(egui::TextEdit::singleline(&mut self.master_key).password(true))
-                    .labelled_by(name_label.id);
-                let into_bnt = ui.add_sized([90.0, 20.0], egui::Button::new("Into vault"));
-                if into_bnt.clicked() {
-                    self.check_vault_access();
+        egui::Grid::new("form").max_col_width(250.0).show(ui, |ui| {
+            let name_label = ui.label("Master Key");
+            ui.add(egui::TextEdit::singleline(&mut self.master_key).password(true))
+                .labelled_by(name_label.id);
+            let into_btn = ui.add_sized([90.0, 20.0], egui::Button::new("Into vault"));
+            if into_btn.clicked() {
+                self.check_vault_access();
+            }
+            ui.end_row();
+            ui.label("Vault");
+            let file_button = ui.add_sized([240.0, 20.0], egui::Button::new("Choose Vault"));
+            if file_button.clicked() {
+                if let Some(path) = rfd::FileDialog::new().add_filter("vault", &["vault"]).pick_file() {
+                    self.path_to_vault = Some(path.into_boxed_path())
                 }
-                ui.end_row();
-                // ui.add_space(200.0);
-                ui.label("Vault");
-                let file_button = ui.add_sized([240.0, 20.0], egui::Button::new("Choose Vault"));
-                if file_button.clicked() {
-                    if let Some(path) = rfd::FileDialog::new().add_filter("vault", &["vault"]).pick_file() {
-                        self.path_to_vault = Some(path.into_boxed_path())
-                    }
-                }
+            }
 
-                let create_vault_btn = ui.add_sized([90.0, 20.0], egui::Button::new("Create Vault"));
-                if create_vault_btn.clicked() {
-                    self.create_vault_modal.modal = true
-                }
-                CreateVaultModal::create_vault_modal(self, ctx);
-            })
+            let create_vault_btn = ui.add_sized([90.0, 20.0], egui::Button::new("Create Vault"));
+            if create_vault_btn.clicked() {
+                self.create_vault_modal.modal = true
+            }
+            CreateVaultModal::create_vault_modal(self, ctx);
         });
     }
-
     fn render_vault(&mut self, ctx: &egui::Context) {
         egui::SidePanel::left("sub-vault").show(ctx, |ui| {
             ui.label("placeholder");

@@ -8,14 +8,22 @@ license = "MIT"
 authors = ["Dmitriy Sergeev <xaneets@gmail.com>"]
 
 [dependencies]
-eframe = {version = "0.28.1", features = ["persistence"]}
-egui_extras = {version = "0.28.1"}
+#gui
+eframe = { version = "0.28.1", features = ["persistence"] }
+egui_extras = { version = "0.28.1" }
+
+#log
 env_logger = "0.10"
+log = "0.4.22"
+
 rfd = "0.12.0"
+
+#crypto
 ring = "0.17.5"
 hex = "0.4.3"
 rand = "0.8.5"
 
-serde = { version = "1.0", features = ["derive"]}
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 bincode = "1.3"
+
