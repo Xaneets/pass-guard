@@ -4,12 +4,12 @@ use crate::{crypto, utils};
 use eframe::egui;
 use eframe::egui::{InnerResponse, PointerButton, Ui};
 use egui::{FontFamily, FontId, TextStyle};
+use egui_extras::{Column, TableBuilder};
 use std::fmt::Write;
 use std::fs::File;
 use std::io;
 use std::io::Read;
 use std::path::Path;
-use egui_extras::{Column, TableBuilder};
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct PassGuardApp {
@@ -137,7 +137,7 @@ impl PassGuardApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.horizontal_top(|ui| {
                 let mut table = TableBuilder::new(ui)
-                    .column(Column::auto().resizable(true))  // Column for Row Index
+                    .column(Column::auto().resizable(true)) // Column for Row Index
                     .column(Column::auto().resizable(true))
                     .column(Column::auto().resizable(true))
                     .body(|mut body| {
@@ -172,8 +172,6 @@ impl PassGuardApp {
                             });
                         }
                     });
-
-
             })
         });
     }
@@ -279,7 +277,8 @@ impl PassGuardApp {
 
 impl eframe::App for PassGuardApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        #[cfg(debug_assertions)]{
+        #[cfg(debug_assertions)]
+        {
             ctx.set_debug_on_hover(true);
         }
         self.show_ui(ctx)
