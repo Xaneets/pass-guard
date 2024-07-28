@@ -22,6 +22,7 @@
 1. Clone the repository: `git clone https://github.com/Xaneets/pass-guard.git`
 2. Navigate to the project directory: `cd pass-guard`
 3. Run the application: `cargo run --release`
+# todo sudo apt-get install libgtk-3-dev
 
 ## Contribution
 
