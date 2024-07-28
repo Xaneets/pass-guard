@@ -279,7 +279,9 @@ impl PassGuardApp {
 
 impl eframe::App for PassGuardApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        ctx.set_debug_on_hover(true);
+        #[cfg(debug_assertions)]{
+            ctx.set_debug_on_hover(true);
+        }
         self.show_ui(ctx)
     }
 }
