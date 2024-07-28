@@ -50,8 +50,8 @@ mod unsafe_cast_tests {
         let byte_one: [u8; 12] = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0];
         let byte_max: [u8; 12] = [0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255];
 
-        assert_eq!(nonce_min, bytes_as_nonce(byte_min));
-        assert_eq!(nonce_one, bytes_as_nonce(byte_one));
-        assert_eq!(nonce_max, bytes_as_nonce(byte_max));
+        assert_eq!(nonce_min, bytes_as_nonce(&byte_min));
+        assert_eq!(nonce_one, bytes_as_nonce(&byte_one));
+        assert_eq!(nonce_max, bytes_as_nonce(&byte_max));
     }
 }
