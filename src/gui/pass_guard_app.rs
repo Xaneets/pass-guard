@@ -17,6 +17,7 @@ pub struct PassGuardApp {
     path_to_vault: Option<Box<Path>>,
     sha_pass: [u8; 32],
     pub create_vault_modal: CreateVaultModal,
+    is_in_vault: bool,
 }
 impl PassGuardApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Box<Self> {
@@ -25,7 +26,7 @@ impl PassGuardApp {
     }
 
     fn style_init(cc: &eframe::CreationContext<'_>) {
-        let heading_font_size = 40.0;
+        let heading_font_size = 20.0;
         let body_font_size = 20.0;
         let monospace_font_size = 12.0;
         let button_font_size = 14.0;
@@ -51,7 +52,48 @@ impl PassGuardApp {
             Self::render_footer(ui);
         });
 
+        match self.is_in_vault {
+            false => {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    self.render_main_form(ui, ctx);
+                    self.dd_preview(ctx);
+                });
+            }
+            true => {
+                self.render_vault(ctx);
+            }
+        }
+    }
+
+    fn render_vault(&mut self, ctx: &egui::Context) {
+        egui::SidePanel::left("sub-vault").show(ctx, |ui| {
+            ui.label("placeholder");
+            ui.label("placeholder");
+            ui.label("placeholder");
+            ui.label("placeholder");
+            ui.label("placeholder");
+            ui.label("placeholder");
+            ui.label("placeholder");
+        });
         egui::CentralPanel::default().show(ctx, |ui| {
+            ui.horizontal_top(|ui| {
+                let grid = egui::Grid::new("records")
+                    .num_columns(5)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        //header
+                        ui.label("Title");
+                        ui.label("User name");
+                        ui.label("Password");
+                        ui.label("URL");
+                        ui.label("Description");
+                        ui.end_row();
+                    })
+                    .response;
+                if grid.clicked() {
+                    println!("Click")
+                }
+            });
             // self.render_vault(ctx);
             self.render_main_form(ui, ctx);
             self.dd_preview(ctx);
@@ -148,17 +190,19 @@ impl PassGuardApp {
                 path = p;
             }
         }
-        let file = File::open(path).expect("eee");
+        let file = File::open(path).expect("Vault access Error");
         let mut buffer = Vec::new();
 
         let mut reader = io::BufReader::new(file);
 
-        reader.read_to_end(&mut buffer).expect("err");
+        reader.read_to_end(&mut buffer).expect("Vault access Error");
         let mut meta: [u8; 16 + 12] = [0; 16 + 12];
         meta.copy_from_slice(&buffer[..16 + 12]);
+
         let mut content = vec![];
         content.extend_from_slice(&buffer[16 + 12..]);
-        let hash = crypto::hash::sha256(self.master_key.as_bytes());
+
+        self.sha_pass = crypto::hash::sha256(self.master_key.as_bytes());
         let mut tag: [u8; 16] = [0; 16];
         tag.copy_from_slice(&meta[..16]);
         let mut nonce: [u8; 12] = [0; 12];
@@ -166,15 +210,13 @@ impl PassGuardApp {
 
         let res = crypto::aes_256_gcm::Aes256Gcm::decrypt(
             content.clone(),
-            hash,
-            utils::unsafe_cast::bytes_as_nonce(&nonce),
-            *utils::unsafe_cast::bytes_as_tag(&tag),
+            self.sha_pass,
+            utils::unsafe_cast::bytes_as_nonce(nonce),
+            *utils::unsafe_cast::bytes_as_tag(tag),
         );
         match res {
             Ok((_, _, _)) => {
-
-                println!("Todo!")
-
+                self.is_in_vault = true;
             }
             Err(e) => {
                 println!("Pass Error! {e}")

@@ -1,7 +1,7 @@
 use ring::aead::{Aad, BoundKey, Nonce, NonceSequence, OpeningKey, SealingKey, Tag, UnboundKey, AES_256_GCM, NONCE_LEN};
 use ring::error::Unspecified;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct NonceSeq(pub u64);
 
 impl NonceSeq {
