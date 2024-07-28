@@ -2,13 +2,14 @@ use crate::gui::create_vault_modal::CreateVaultModal;
 use crate::{crypto, utils};
 
 use eframe::egui;
-use eframe::egui::{InnerResponse, Ui};
+use eframe::egui::{InnerResponse, PointerButton, Ui};
 use egui::{FontFamily, FontId, TextStyle};
 use std::fmt::Write;
 use std::fs::File;
 use std::io;
 use std::io::Read;
 use std::path::Path;
+use egui_extras::{Column, TableBuilder};
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct PassGuardApp {
@@ -51,6 +52,7 @@ impl PassGuardApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
+            // self.render_vault(ctx);
             self.render_main_form(ui, ctx);
             self.dd_preview(ctx);
         });
@@ -59,7 +61,7 @@ impl PassGuardApp {
     fn render_main_form(&mut self, ui: &mut Ui, ctx: &egui::Context) {
         ui.horizontal_centered(|ui| {
             egui::Grid::new("form").max_col_width(250.0).show(ui, |ui| {
-                ui.add_space(200.0);
+                // ui.add_space(200.0);
                 let name_label = ui.label("Master Key");
                 ui.add(egui::TextEdit::singleline(&mut self.master_key).password(true))
                     .labelled_by(name_label.id);
@@ -68,7 +70,7 @@ impl PassGuardApp {
                     self.check_vault_access();
                 }
                 ui.end_row();
-                ui.add_space(200.0);
+                // ui.add_space(200.0);
                 ui.label("Vault");
                 let file_button = ui.add_sized([240.0, 20.0], egui::Button::new("Choose Vault"));
                 if file_button.clicked() {
@@ -86,6 +88,53 @@ impl PassGuardApp {
         });
     }
 
+    fn render_vault(&mut self, ctx: &egui::Context) {
+        egui::SidePanel::left("sub-vault").show(ctx, |ui| {
+            ui.label("placeholder");
+        });
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.horizontal_top(|ui| {
+                let mut table = TableBuilder::new(ui)
+                    .column(Column::auto().resizable(true))  // Column for Row Index
+                    .column(Column::auto().resizable(true))
+                    .column(Column::auto().resizable(true))
+                    .body(|mut body| {
+                        body.row(18.0, |mut row| {
+                            row.col(|ui| {
+                                ui.label("Header");
+                            });
+                            row.col(|ui| {
+                                ui.label("Header2");
+                            });
+                            row.col(|ui| {
+                                ui.label("Header3");
+                            });
+                        });
+                        for i in 0..10 {
+                            body.row(18.0, |mut row| {
+                                row.col(|ui| {
+                                    ui.label(format!("{}", i));
+                                });
+                                row.col(|ui| {
+                                    let label = ui.label(format!("Row {}, Col 1", i));
+                                    if label.interact(egui::Sense::click()).clicked() {
+                                        println!("Clicked on Row {}, Col 1", i);
+                                    }
+                                });
+                                row.col(|ui| {
+                                    let label = ui.label(format!("Row {}, Col 2", i));
+                                    if label.interact(egui::Sense::click()).clicked() {
+                                        println!("Clicked on Row {}, Col 2", i);
+                                    }
+                                });
+                            });
+                        }
+                    });
+
+
+            })
+        });
+    }
     fn check_vault_access(&mut self) {
         if self.master_key.is_empty() {
             return;
@@ -118,12 +167,14 @@ impl PassGuardApp {
         let res = crypto::aes_256_gcm::Aes256Gcm::decrypt(
             content.clone(),
             hash,
-            utils::unsafe_cast::bytes_as_nonce(nonce),
-            *utils::unsafe_cast::bytes_as_tag(tag),
+            utils::unsafe_cast::bytes_as_nonce(&nonce),
+            *utils::unsafe_cast::bytes_as_tag(&tag),
         );
         match res {
             Ok((_, _, _)) => {
+
                 println!("Todo!")
+
             }
             Err(e) => {
                 println!("Pass Error! {e}")
@@ -186,6 +237,7 @@ impl PassGuardApp {
 
 impl eframe::App for PassGuardApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        ctx.set_debug_on_hover(true);
         self.show_ui(ctx)
     }
 }
